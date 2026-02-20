@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tablero Kanban</title>
+	<link rel="stylesheet" href="./assets/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <meta name="description" content="Panel Kanban online gratuito para gestionar tareas. Arrastra y suelta, filtra por prioridad o para hoy, usa múltiples tableros y guarda en LocalStorage.">
+    <meta name="keywords" content="Kanban, tareas, online, gratuito, free, drag and drop, localStorage, organización">
+	<!-- Matomo -->
+<script>
+  var _paq = window._paq = window._paq || [];
+  /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
+  _paq.push(['trackPageView']);
+  _paq.push(['enableLinkTracking']);
+  (function() {
+    var u="https://scriptsx.ddns.net/";
+    _paq.push(['setTrackerUrl', u+'matomo.php']);
+    _paq.push(['setSiteId', '5']);
+    var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+    g.async=true; g.src=u+'matomo.js'; s.parentNode.insertBefore(g,s);
+  })();
+</script>
+<!-- End Matomo Code -->
+<script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        },
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Navbar -->
+    <nav class="bg-white border-b border-gray-200 fixed w-full z-30 shadow-sm">
+        <div class="px-3 py-3 lg:px-5 lg:pl-3">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center justify-start">
+                    <a href="#" class="text-xl font-bold flex items-center lg:ml-2.5">
+                        <i class="fas fa-tasks text-primary-600 mr-2"></i>
+                        <span class="self-center whitespace-nowrap">Kanban</span>
+                    </a>
+                    <span id="current-board-name" class="ml-4 text-sm text-gray-500">Tablero principal</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button id="reset-btn" class="text-gray-500 hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 rounded-lg text-sm p-2.5">
+                        <i class="fas fa-trash-alt"></i>
+                        <span class="ml-1 hidden md:inline-block">Reiniciar</span>
+                    </button>
+                    <div class="flex space-x-2">
+                        <button id="boards-btn" class="text-gray-500 hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 rounded-lg text-sm p-2.5">
+                            <i class="fas fa-th-list"></i>
+                            <span class="ml-1 hidden md:inline-block">Mis tableros</span>
+                        </button>
+                        <button id="new-board-btn" class="text-gray-500 hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 rounded-lg text-sm p-2.5">
+                            <i class="fas fa-plus"></i>
+                            <span class="ml-1 hidden md:inline-block">Nuevo tablero</span>
+                        </button>
+                    </div>
+                    <button id="theme-toggle" type="button" class="text-gray-500 hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 rounded-lg text-sm p-2.5">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main content -->
+    <div class="flex overflow-hidden pt-16">
+        <div id="main-content" class="h-full w-full bg-gray-50 relative overflow-y-auto">
+            <main class="py-6 px-4">
+                <div class="flex items-center justify-between mb-4">
+                    <h1 class="text-2xl font-semibold text-gray-800">Tablero Kanban</h1>
+                    <div class="flex space-x-2">
+                        <div class="relative">
+                            <input type="text" id="search-input" class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 p-2.5" placeholder="Buscar tareas...">
+                            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                <i class="fas fa-search text-gray-500"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filtros -->
+                <div class="flex flex-wrap gap-2 mb-6">
+                    <button class="filter-btn active px-3 py-1.5 text-sm font-medium rounded-lg bg-primary-100 text-primary-800 hover:bg-primary-200" data-filter="all">
+                        Todas
+                    </button>
+                    <button class="filter-btn px-3 py-1.5 text-sm font-medium rounded-lg bg-gray-100 text-gray-800 hover:bg-gray-200" data-filter="high">
+                        <i class="fas fa-arrow-up text-red-500 mr-1"></i> Alta prioridad
+                    </button>
+                    <button class="filter-btn px-3 py-1.5 text-sm font-medium rounded-lg bg-gray-100 text-gray-800 hover:bg-gray-200" data-filter="medium">
+                        <i class="fas fa-minus text-yellow-500 mr-1"></i> Media prioridad
+                    </button>
+                    <button class="filter-btn px-3 py-1.5 text-sm font-medium rounded-lg bg-gray-100 text-gray-800 hover:bg-gray-200" data-filter="low">
+                        <i class="fas fa-arrow-down text-green-500 mr-1"></i> Baja prioridad
+                    </button>
+                    <button class="filter-btn px-3 py-1.5 text-sm font-medium rounded-lg bg-gray-100 text-gray-800 hover:bg-gray-200" data-filter="today">
+                        <i class="fas fa-calendar-day text-primary-500 mr-1"></i> Para hoy
+                    </button>
+                </div>
+
+                <!-- Tablero Kanban -->
+                <div id="kanban-board" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Columna Por hacer -->
+                    <div class="kanban-column bg-white rounded-xl shadow-sm border border-gray-200" data-status="todo">
+                        <div class="p-4 border-b border-gray-200 flex justify-between items-center bg-blue-50 rounded-t-xl">
+                            <h2 class="font-semibold text-blue-700 flex items-center">
+                                <i class="fas fa-clipboard-list mr-2"></i>
+                                Por hacer
+                            </h2>
+                            <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                                <span id="todo-count">0</span> tareas
+                            </span>
+                        </div>
+                        <div class="p-3 space-y-3 todo-cards min-h-[200px]">
+                            <!-- Las tarjetas se cargarán desde localStorage -->
+                        </div>
+                        <div class="p-3 border-t border-gray-100">
+                            <button class="add-task-btn w-full py-2 text-sm text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors flex items-center justify-center">
+                                <i class="fas fa-plus mr-2"></i> Añadir tarea
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Columna En progreso -->
+                    <div class="kanban-column bg-white rounded-xl shadow-sm border border-gray-200" data-status="progress">
+                        <div class="p-4 border-b border-gray-200 flex justify-between items-center bg-yellow-50 rounded-t-xl">
+                            <h2 class="font-semibold text-yellow-700 flex items-center">
+                                <i class="fas fa-spinner mr-2"></i>
+                                En progreso
+                            </h2>
+                            <span class="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                                <span id="progress-count">0</span> tareas
+                            </span>
+                        </div>
+                        <div class="p-3 space-y-3 progress-cards min-h-[200px]">
+                            <!-- Las tarjetas se cargarán desde localStorage -->
+                        </div>
+                        <div class="p-3 border-t border-gray-100">
+                            <button class="add-task-btn w-full py-2 text-sm text-yellow-600 hover:text-yellow-800 bg-yellow-50 hover:bg-yellow-100 rounded-lg transition-colors flex items-center justify-center">
+                                <i class="fas fa-plus mr-2"></i> Añadir tarea
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Columna Hecho -->
+                    <div class="kanban-column bg-white rounded-xl shadow-sm border border-gray-200" data-status="done">
+                        <div class="p-4 border-b border-gray-200 flex justify-between items-center bg-green-50 rounded-t-xl">
+                            <h2 class="font-semibold text-green-700 flex items-center">
+                                <i class="fas fa-check-circle mr-2"></i>
+                                Hecho
+                            </h2>
+                            <span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                                <span id="done-count">0</span> tareas
+                            </span>
+                        </div>
+                        <div class="p-3 space-y-3 done-cards min-h-[200px]">
+                            <!-- Las tarjetas se cargarán desde localStorage -->
+                        </div>
+                        <div class="p-3 border-t border-gray-100">
+                            <button class="add-task-btn w-full py-2 text-sm text-green-600 hover:text-green-800 bg-green-50 hover:bg-green-100 rounded-lg transition-colors flex items-center justify-center">
+                                <i class="fas fa-plus mr-2"></i> Añadir tarea
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+            <!-- Footer -->
+            <footer class="bg-white p-4 shadow md:flex md:items-center md:justify-between md:p-6 border-t border-gray-200 mt-10">
+                <span class="text-sm text-gray-500">
+                    © <span id="current-year"></span> Kanban
+                </span>
+                <a href="./readme.html" class="text-sm text-blue-600 hover:underline">
+                    📘 Ver documentación
+                </a>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Modal para añadir/editar tarea -->
+    <div id="task-modal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+                <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+            </div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="sm:flex sm:items-start">
+                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                                Añadir nueva tarea
+                            </h3>
+                            <div class="mt-4 space-y-4">
+                                <div>
+                                    <label for="task-title" class="block text-sm font-medium text-gray-700">Título</label>
+                                    <input type="text" name="task-title" id="task-title" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500">
+                                </div>
+                                <div>
+                                    <label for="task-description" class="block text-sm font-medium text-gray-700">Descripción</label>
+                                    <textarea id="task-description" name="task-description" rows="3" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500"></textarea>
+                                </div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="task-priority" class="block text-sm font-medium text-gray-700">Prioridad</label>
+                                        <select id="task-priority" name="task-priority" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500">
+                                            <option value="low">Baja</option>
+                                            <option value="medium">Media</option>
+                                            <option value="high">Alta</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label for="task-date" class="block text-sm font-medium text-gray-700">Fecha límite</label>
+                                        <input type="date" name="task-date" id="task-date" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label for="task-tags" class="block text-sm font-medium text-gray-700">Etiquetas (separadas por comas)</label>
+                                    <input type="text" name="task-tags" id="task-tags" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500" placeholder="Diseño, Frontend, API...">
+                                </div>
+                                <div>
+                                    <label for="task-status" class="block text-sm font-medium text-gray-700">Estado</label>
+                                    <select id="task-status" name="task-status" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500">
+                                        <option value="todo">Por hacer</option>
+                                        <option value="progress">En progreso</option>
+                                        <option value="done">Hecho</option>
+                                    </select>
+                                </div>
+                                <input type="hidden" id="task-id" value="">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button type="button" id="save-task-btn" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-primary-600 text-base font-medium text-white hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 sm:ml-3 sm:w-auto sm:text-sm">
+                        Guardar
+                    </button>
+                    <button type="button" id="cancel-task-btn" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                        Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para nuevo tablero -->
+    <div id="board-modal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+                <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+            </div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="sm:flex sm:items-start">
+                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900" id="board-modal-title">
+                                Crear nuevo tablero
+                            </h3>
+                            <div class="mt-4">
+                                <div>
+                                    <label for="board-name" class="block text-sm font-medium text-gray-700">Nombre del tablero</label>
+                                    <input type="text" name="board-name" id="board-name" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-primary-500 focus:border-primary-500" placeholder="Mi nuevo tablero">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button type="button" id="save-board-btn" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-primary-600 text-base font-medium text-white hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 sm:ml-3 sm:w-auto sm:text-sm">
+                        Crear tablero
+                    </button>
+                    <button type="button" id="cancel-board-btn" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                        Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para seleccionar tablero -->
+    <div id="boards-list-modal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+                <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+            </div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="sm:flex sm:items-start">
+                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900">
+                                Mis tableros
+                            </h3>
+                            <div class="mt-4">
+                                <ul id="board-list" class="divide-y divide-gray-200">
+                                    <!-- Los tableros se cargarán dinámicamente -->
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button type="button" id="new-board-modal-btn" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-primary-600 text-base font-medium text-white hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 sm:ml-3 sm:w-auto sm:text-sm">
+                        Nuevo tablero
+                    </button>
+                    <button type="button" id="close-boards-btn" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                        Cerrar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+        <!-- Script para año dinámico -->
+    <script>
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+    </script>
+</body>
+</html>

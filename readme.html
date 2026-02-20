@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Documentación - Kanban</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- FontAwesome -->
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans">
+
+    <!-- Contenedor principal -->
+    <div class="max-w-3xl mx-auto p-6 bg-white shadow-lg rounded-lg mt-10">
+
+        <!-- Título Principal -->
+        <h1 class="text-4xl font-extrabold mb-6 flex items-center gap-3">
+            <i class="fas fa-exclamation-triangle text-yellow-500"></i>
+            Importante
+        </h1>
+
+        <p class="mb-4 text-lg">
+            Este panel Kanban <strong>no cuenta con almacenamiento permanente ni backend</strong>.
+            Toda la información se guarda únicamente en 
+            <code class="bg-gray-200 px-1 rounded">localStorage</code> del navegador.
+        </p>
+
+        <p class="mb-4 text-lg">Esto significa que:</p>
+
+        <ul class="list-disc pl-8 mb-8 space-y-2 text-gray-700">
+            <li>Si borras los datos del navegador, perderás la información.</li>
+            <li>Si usas modo incógnito, los datos no se conservarán.</li>
+            <li>Si cambias de dispositivo o navegador, no verás tus tableros.</li>
+        </ul>
+
+        <hr class="my-8 border-gray-300">
+
+        <h2 class="text-2xl font-semibold mb-4 flex items-center gap-2">
+            <i class="fas fa-sticky-note text-blue-500"></i>
+            Recomendación de uso
+        </h2>
+
+        <p class="mb-4 text-lg">Este proyecto está pensado para:</p>
+
+        <ul class="list-disc pl-8 mb-6 space-y-2 text-gray-700">
+            <li>Uso personal</li>
+            <li>Organización temporal</li>
+            <li>Pruebas rápidas</li>
+            <li>Equipos donde no se limpian los datos del navegador con frecuencia</li>
+        </ul>
+
+        <p class="font-medium text-red-600 text-lg">
+            No está diseñado para uso crítico ni almacenamiento a largo plazo.
+        </p>
+
+        <!-- Botón de regreso -->
+        <div class="mt-10">
+            <a href="https://soysh.github.io/kanban/" 
+               class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                <i class="fas fa-arrow-left"></i>
+                Volver al Kanban
+            </a>
+        </div>
+
+    </div>
+
+    <!-- Footer bonito -->
+    <footer class="mt-12 text-center text-gray-500 text-sm">
+        © 2026 Kanban | Hecho con <i class="fas fa-heart text-red-500"></i> por SoySh
+    </footer>
+
+</body>
+</html>

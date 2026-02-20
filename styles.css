@@ -1,0 +1,164 @@
+/* Estilos generales */
+.dark {
+  background-color: #1f2937;
+  color: #f3f4f6;
+}
+
+.dark .bg-white {
+  background-color: #111827;
+}
+
+.dark .text-gray-800 {
+  color: #f3f4f6;
+}
+
+.dark .text-gray-500 {
+  color: #9ca3af;
+}
+
+.dark .border-gray-200 {
+  border-color: #374151;
+}
+
+.dark .bg-gray-50 {
+  background-color: #1f2937;
+}
+
+.dark .bg-gray-100 {
+  background-color: #374151;
+}
+
+.dark .text-gray-900 {
+  color: #f3f4f6;
+}
+
+.dark .text-gray-700 {
+  color: #e5e7eb;
+}
+
+/* Estilos para el Kanban */
+.kanban-column {
+  min-height: 300px;
+  transition: all 0.3s ease;
+}
+
+.kanban-card {
+  position: relative;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: grab;
+  user-select: none;
+}
+
+.kanban-card:active {
+  cursor: grabbing;
+}
+
+.kanban-card.dragging {
+  opacity: 0.5;
+  transform: scale(1.02);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+}
+
+.kanban-column.drop-zone {
+  background-color: rgba(209, 250, 229, 0.3);
+  border: 2px dashed #10b981;
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInFromLeft {
+  0% {
+    transform: translateX(-10%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.animate-slide-in-left {
+  animation: slideInFromLeft 0.5s ease-in-out;
+}
+
+/* Estilos para el modo oscuro */
+.dark .kanban-card {
+  background-color: #1e293b;
+  border-color: #334155;
+}
+
+.dark .kanban-column {
+  background-color: #111827;
+  border-color: #374151;
+}
+
+/* Estilos responsivos */
+@media (max-width: 768px) {
+  .kanban-column {
+    margin-bottom: 1rem;
+  }
+}
+
+/* Estilos para el scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: #1f2937;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #4b5563;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}
+
+/* Estilos para los tableros en la lista */
+.board-item {
+  transition: all 0.2s ease;
+}
+
+.board-item:hover {
+  background-color: #f3f4f6;
+}
+
+.board-item.active {
+  background-color: #e0f2fe;
+}
+
+.dark .board-item:hover {
+  background-color: #374151;
+}
+
+.dark .board-item.active {
+  background-color: #0c4a6e;
+}
+

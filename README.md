@@ -1,3 +1,5 @@
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/SoySH/kanban)
+
 # ⚠️ Importante
 
 Este panel Kanban **no cuenta con almacenamiento permanente ni backend**.  
